@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTU Results Automation - Professional Interface</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #e6f7ff; /* Light blue background */
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: #000;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        .card h2 {
+            color: #000;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .input-section {
+            height: fit-content;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background: #fff;
+            color: #000;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #666;
+            box-shadow: 0 0 0 3px rgba(102, 102, 102, 0.1);
+        }
+
+        .usn-textarea {
+            height: 150px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #4a4a4a;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: #333;
+        }
+
+        .btn-danger {
+            background: #ffcccc; /* Light red for delete buttons */
+            color: #000;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: #ff9999; /* Darker light red on hover */
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-section {
+            min-height: 500px;
+            background: #000; /* Black background for processing status screen */
+            color: #fff; /* White text for better visibility on black */
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .progress-container {
+            margin-bottom: 25px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4a90e2;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #000;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .current-usn {
+            background: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #111;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #333;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-info { background: rgba(74, 144, 226, 0.2); color: #4a90e2; }
+        .log-success { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
+        .log-warning { background: rgba(237, 137, 54, 0.2); color: #ed8936; }
+        .log-error { background: rgba(245, 101, 101, 0.2); color: #f56565; }
+
+        .results-section {
+            grid-column: 1 / -1;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .result-file {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .result-file:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 5px;
+        }
+
+        .file-meta {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .download-btn {
+            padding: 8px 15px;
+            background: #4a4a4a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .download-btn:hover {
+            background: #333;
+        }
+
+        /* Delete button specific styling */
+        .delete-btn {
+            padding: 8px 15px;
+            background: #ffcccc; /* Light red for delete buttons */
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            background: #ff9999; /* Darker light red on hover */
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                background: #000;
+                color: #fff;
+            }
+            
+            .header {
+                color: #fff;
+            }
+            
+            .card {
+                background: #111;
+                border: 1px solid #333;
+                color: #fff;
+            }
+            
+            .card h2 {
+                color: #fff;
+                border-bottom: 2px solid #333;
+            }
+            
+            .form-group label {
+                color: #fff;
+            }
+            
+            .form-group input,
+            .form-group textarea {
+                background: #222;
+                color: #fff;
+                border: 2px solid #333;
+            }
+            
+            .stat-card {
+                background: #111;
+                border: 1px solid #333;
+            }
+            
+            .stat-number {
+                color: #fff;
+            }
+            
+            .stat-label {
+                color: #aaa;
+            }
+            
+            .log-container {
+                background: #111;
+                border: 1px solid #333;
+            }
+            
+            .log-info { background: rgba(255, 255, 255, 0.1); color: #fff; }
+            .log-success { background: rgba(255, 255, 255, 0.1); color: #fff; }
+            .log-warning { background: rgba(255, 255, 255, 0.1); color: #fff; }
+            .log-error { background: rgba(255, 255, 255, 0.1); color: #fff; }
+            
+            .result-file {
+                background: #111;
+                border: 1px solid #333;
+            }
+            
+            .file-name {
+                color: #fff;
+            }
+            
+            .file-meta {
+                color: #aaa;
+            }
+            
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-graduation-cap"></i> VTU Results Automation</h1>
+            <p>2025, 5th SEM AI&DS Mini-project, built by Rohit R, Shreyas S, Channakeshava N, Akshay S George</p>
+        </header>
+
+        <div class="main-grid">
+            <!-- Input Section -->
+            <div class="card input-section">
+                <h2><i class="fas fa-edit"></i> Batch Configuration</h2>
+                
+                <div class="form-group">
+                    <label for="formUrl">VTU Results Form URL</label>
+                    <input type="url" id="formUrl" placeholder="https://results.vtu.ac.in/..." value="https://results.vtu.ac.in/JJEcbcs25/index.php">
+                </div>
+                
+                <div class="form-group">
+                    <label for="batchName">Batch Name</label>
+                    <input type="text" id="batchName" placeholder="Enter batch name (optional)" value="Web Batch">
+                </div>
+
+                <div class="form-group">
+                    <label for="usnList">USN List (One per line)</label>
+                    <textarea id="usnList" class="usn-textarea" placeholder="1SP23AD027&#10;1SP23AD028&#10;1SP23AD029&#10;...">1SP23AD027
+1SP23AD028
+1SP23AD029
+1SP23AD030</textarea>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="headlessMode" checked>
+                    <label for="headlessMode">Headless Mode (Faster processing)</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enablePdf" checked>
+                    <label for="enablePdf">Enable PDF Download</label>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="startBtn">
+                        <i class="fas fa-play"></i> Start Processing
+                    </button>
+                    <button class="btn btn-danger" id="stopBtn" disabled>
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status Section -->
+            <div class="card status-section">
+                <h2><i class="fas fa-chart-line"></i> Processing Status</h2>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Ready to start</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="successCount" style="color: #48bb78;">0</div>
+                        <div class="stat-label">Success</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="failedCount" style="color: #f56565;">0</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                </div>
+
+                <div class="current-usn" id="currentUSN" style="display: none;">
+                    <i class="fas fa-cog fa-spin"></i> Processing: <span id="currentUSNText">-</span>
+                </div>
+
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry log-info">
+                        <span class="timestamp">[Ready]</span> System initialized and ready for batch processing
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="card results-section">
+            <h2><i class="fas fa-download"></i> Generated Files</h2>
+            <div class="btn-group" style="margin-bottom: 20px;">
+                <button class="btn btn-primary" id="convertToExcelBtn" onclick="convertToExcel()">
+                    <i class="fas fa-file-excel"></i> Convert PDFs to Excel
+                </button>
+                <button class="btn btn-danger" id="deleteCaptchasBtn" onclick="deleteCaptchas()" title="Delete all captcha images to free up space">
+                    <i class="fas fa-trash-alt"></i> Delete Captchas
+                </button>
+                <button class="btn btn-danger" id="deleteAllPdfsBtn" onclick="deleteAllPdfs()" title="Delete all PDF files">
+                    <i class="fas fa-file-pdf"></i> Delete All PDFs
+                </button>
+            </div>
+            <div id="captchaWarning" style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: none;">
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-exclamation-triangle" style="color: #856404; font-size: 1.2rem; margin-right: 10px;"></i>
+                    <span><strong>Captcha images occupy extra space:</strong> Delete them to free up storage space.</span>
+                </div>
+            </div>
+            <div class="results-grid" id="resultsGrid">
+                <div style="grid-column: 1 / -1; text-align: center; color: #718096; padding: 40px;">
+                    <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 10px; opacity: 0.3;"></i>
+                    <p>No files generated yet. Start processing to see results here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO
+        const socket = io();
+        
+        // DOM elements
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const usnList = document.getElementById('usnList');
+        const batchName = document.getElementById('batchName');
+        const formUrl = document.getElementById('formUrl');
+        const headlessMode = document.getElementById('headlessMode');
+        const enablePdf = document.getElementById('enablePdf');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const totalCount = document.getElementById('totalCount');
+        const successCount = document.getElementById('successCount');
+        const failedCount = document.getElementById('failedCount');
+        const currentUSN = document.getElementById('currentUSN');
+        const currentUSNText = document.getElementById('currentUSNText');
+        const logContainer = document.getElementById('logContainer');
+        const resultsGrid = document.getElementById('resultsGrid');
+
+        // State
+        let isProcessing = false;
+
+        // Event listeners
+        startBtn.addEventListener('click', startProcessing);
+        stopBtn.addEventListener('click', stopProcessing);
+
+        // Socket event handlers
+        socket.on('status_update', updateStatus);
+        socket.on('log_update', addLogEntry);
+        socket.on('batch_complete', onBatchComplete);
+
+        function startProcessing() {
+            const usns = usnList.value.trim().split('\n').filter(usn => usn.trim());
+            const batch = batchName.value.trim() || 'Web Batch';
+            const formUrlValue = formUrl.value.trim();
+            const headless = headlessMode.checked;
+            const pdfEnabled = enablePdf.checked;
+
+            if (!formUrlValue) {
+                alert('Please enter the VTU results form URL');
+                return;
+            }
+
+            if (usns.length === 0) {
+                alert('Please enter at least one USN');
+                return;
+            }
+
+            fetch('/api/start_batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    usns: usns,
+                    form_url: formUrlValue,
+                    batch_name: batch,
+                    headless: headless,
+                    enable_pdf: pdfEnabled
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    isProcessing = true;
+                    startBtn.disabled = true;
+                    startBtn.innerHTML = '<div class="loading-spinner"></div> Processing...';
+                    stopBtn.disabled = false;
+                    usnList.disabled = true;
+                    batchName.disabled = true;
+                    formUrl.disabled = true;
+                    headlessMode.disabled = true;
+                    enablePdf.disabled = true;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start processing');
+            });
+        }
+
+        function stopProcessing() {
+            fetch('/api/stop_batch', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    stopBtn.disabled = true;
+                    stopBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> Stopping...';
+                }
+            });
+        }
+
+        function updateStatus(status) {
+            // Update progress
+            const progress = status.total > 0 ? (status.progress / status.total) * 100 : 0;
+            progressFill.style.width = progress + '%';
+            
+            if (status.is_running) {
+                progressText.textContent = `Processing ${status.progress}/${status.total} USNs`;
+                currentUSN.style.display = 'block';
+                currentUSNText.textContent = status.current_usn || 'Initializing...';
+                
+                if (status.current_usn) {
+                    currentUSN.classList.add('pulse');
+                }
+            } else {
+                currentUSN.style.display = 'none';
+                currentUSN.classList.remove('pulse');
+                
+                if (status.progress > 0) {
+                    progressText.textContent = `Completed ${status.progress}/${status.total} USNs`;
+                } else {
+                    progressText.textContent = 'Ready to start';
+                }
+            }
+
+            // Update counts
+            totalCount.textContent = status.total;
+            successCount.textContent = status.successful;
+            failedCount.textContent = status.failed;
+
+            // Update button states
+            if (!status.is_running && isProcessing) {
+                resetUI();
+            }
+        }
+
+        function addLogEntry(logData) {
+            if (logData.logs) {
+                // Initial log load
+                logContainer.innerHTML = '';
+                logData.logs.forEach(entry => addSingleLogEntry(entry));
+            } else {
+                // Single log entry
+                addSingleLogEntry(logData);
+            }
+        }
+
+        function addSingleLogEntry(entry) {
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${entry.level}`;
+            logEntry.innerHTML = `<span class="timestamp">[${entry.timestamp}]</span> ${entry.message}`;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function onBatchComplete(data) {
+            // Show completion notification
+            const successRate = data.success_rate.toFixed(1);
+            addSingleLogEntry({
+                timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                message: `🎉 Batch completed with ${successRate}% success rate!`,
+                level: 'success'
+            });
+
+            // Refresh results
+            loadResults();
+            
+            // Reset UI after a brief delay
+            setTimeout(resetUI, 1000);
+        }
+
+        function resetUI() {
+            isProcessing = false;
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<i class="fas fa-play"></i> Start Processing';
+            stopBtn.disabled = true;
+            stopBtn.innerHTML = '<i class="fas fa-stop"></i> Stop';
+            usnList.disabled = false;
+            batchName.disabled = false;
+            formUrl.disabled = false;
+            headlessMode.disabled = false;
+            enablePdf.disabled = false;
+            
+            // Auto-refresh results
+            loadResults();
+        }
+
+        function loadResults() {
+            // Check for captcha files and show warning if they exist
+            fetch('/api/captcha_status')
+            .then(response => response.json())
+            .then(captchaData => {
+                const captchaWarning = document.getElementById('captchaWarning');
+                if (captchaData.has_captchas && captchaData.count > 0) {
+                    captchaWarning.style.display = 'block';
+                    captchaWarning.innerHTML = `
+                        <div style="display: flex; align-items: center;">
+                            <i class="fas fa-exclamation-triangle" style="color: #856404; font-size: 1.2rem; margin-right: 10px;"></i>
+                            <span><strong>Captcha images occupy extra space:</strong> ${captchaData.count} captcha images found. Delete them to free up storage space.</span>
+                        </div>
+                    `;
+                } else {
+                    captchaWarning.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                // Silently fail if captcha status check fails
+                console.log('Could not check captcha status:', error);
+            });
+            
+            fetch('/api/results')
+            .then(response => response.json())
+            .then(files => {
+                if (files.length === 0) {
+                    resultsGrid.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; color: #718096; padding: 40px;">
+                            <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 10px; opacity: 0.3;"></i>
+                            <p>No files generated yet. Start processing to see results here.</p>
+                        </div>
+                    `;
+                } else {
+                    resultsGrid.innerHTML = files.map(file => `
+                        <div class="result-file">
+                            <div class="file-info">
+                                <div class="file-name">
+                                    <i class="fas ${getFileIcon(file.name)}"></i> ${file.name}
+                                </div>
+                                <div class="file-meta">${formatFileSize(file.size)} • ${formatDate(file.modified)}</div>
+                            </div>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="download-btn" onclick="downloadFile('${file.path}')" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="delete-btn" onclick="deleteFile('${file.path}')" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            })
+            .catch(error => console.error('Error loading results:', error));
+        }
+
+        function getFileIcon(filename) {
+            if (filename.endsWith('.pdf')) return 'fa-file-pdf';
+            if (filename.endsWith('.png') || filename.endsWith('.jpg')) return 'fa-file-image';
+            if (filename.endsWith('.json')) return 'fa-file-code';
+            return 'fa-file';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleString();
+        }
+
+        function downloadFile(filename) {
+            window.open(`/api/download/${filename}`, '_blank');
+        }
+
+        function deleteFile(filename) {
+            if (confirm(`Are you sure you want to delete ${filename}?`)) {
+                fetch(`/api/delete/${filename}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addSingleLogEntry({
+                            timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                            message: `🗑️ Deleted file: ${filename}`,
+                            level: 'info'
+                        });
+                        // Refresh the results list
+                        loadResults();
+                    } else {
+                        addSingleLogEntry({
+                            timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                            message: `❌ Error deleting file: ${data.message}`,
+                            level: 'error'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    addSingleLogEntry({
+                        timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                        message: `❌ Error deleting file: ${error.message}`,
+                        level: 'error'
+                    });
+                });
+            }
+        }
+
+        function convertToExcel() {
+            const convertBtn = document.getElementById('convertToExcelBtn');
+            const originalText = convertBtn.innerHTML;
+            convertBtn.innerHTML = '<div class="loading-spinner"></div> Converting...';
+            convertBtn.disabled = true;
+
+            fetch('/api/convert_to_excel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addSingleLogEntry({
+                        timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                        message: `✅ ${data.message}`,
+                        level: 'success'
+                    });
+                    
+                    // Show the generated file
+                    if (data.files) {
+                        addSingleLogEntry({
+                            timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                            message: `📁 Generated Excel file: ${data.files.excel}`,
+                            level: 'info'
+                        });
+                    }
+                    
+                    // Refresh results
+                    loadResults();
+                } else {
+                    addSingleLogEntry({
+                        timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                        message: `❌ ${data.message}`,
+                        level: 'error'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addSingleLogEntry({
+                    timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                    message: `❌ Error converting PDFs to Excel: ${error.message}`,
+                    level: 'error'
+                });
+            })
+            .finally(() => {
+                convertBtn.innerHTML = originalText;
+                convertBtn.disabled = false;
+            });
+        }
+
+        function deleteCaptchas() {
+            const deleteBtn = document.getElementById('deleteCaptchasBtn');
+            const originalText = deleteBtn.innerHTML;
+            deleteBtn.innerHTML = '<div class="loading-spinner"></div> Deleting...';
+            deleteBtn.disabled = true;
+
+            fetch('/api/delete_captchas', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addSingleLogEntry({
+                        timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                        message: `🗑️ ${data.message}`,
+                        level: 'success'
+                    });
+                    
+                    // Hide the warning message
+                    document.getElementById('captchaWarning').style.display = 'none';
+                    
+                    // Refresh results
+                    loadResults();
+                } else {
+                    addSingleLogEntry({
+                        timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                        message: `❌ ${data.message}`,
+                        level: 'error'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addSingleLogEntry({
+                    timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                    message: `❌ Error deleting captcha images: ${error.message}`,
+                    level: 'error'
+                });
+            })
+            .finally(() => {
+                deleteBtn.innerHTML = originalText;
+                deleteBtn.disabled = false;
+            });
+        }
+
+        function deleteAllPdfs() {
+            // Show confirmation dialog
+            if (!confirm('⚠️ Are you sure you want to delete ALL PDF files? This action cannot be undone.')) {
+                return;
+            }
+            
+            // Show second confirmation
+            if (!confirm('⚠️ This will permanently delete ALL PDF files from the system. Are you absolutely sure?')) {
+                return;
+            }
+            
+            const deleteBtn = document.getElementById('deleteAllPdfsBtn');
+            const originalText = deleteBtn.innerHTML;
+            deleteBtn.innerHTML = '<div class="loading-spinner"></div> Deleting...';
+            deleteBtn.disabled = true;
+
+            fetch('/api/delete_all_pdfs', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addSingleLogEntry({
+                        timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                        message: `🗑️ ${data.message}`,
+                        level: 'success'
+                    });
+                    
+                    // Refresh results
+                    loadResults();
+                } else {
+                    addSingleLogEntry({
+                        timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                        message: `❌ ${data.message}`,
+                        level: 'error'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addSingleLogEntry({
+                    timestamp: new Date().toLocaleTimeString().slice(0, 8),
+                    message: `❌ Error deleting PDF files: ${error.message}`,
+                    level: 'error'
+                });
+            })
+            .finally(() => {
+                deleteBtn.innerHTML = originalText;
+                deleteBtn.disabled = false;
+            });
+        }
+
+        // Initialize
+        loadResults();
+        
+        // Auto-refresh results every 30 seconds
+        setInterval(loadResults, 30000);
+    </script>
+</body>
+</html>
