@@ -1,3 +1,7 @@
+#BUILD BY 5th SEM VTU STUDENTS for Mini-Project
+  Rohit.R trained the CNN Model.
+  Shreyas built the Automation. 
+  
 # VTU Results Automation System
 
 An automated system for fetching results from VTU (Visvesvaraya Technological University) using Playwright browser automation and a locally trained PyTorch model for CAPTCHA recognition. Includes a real‑time web interface with ultra‑fast batch processing.
@@ -126,3 +130,6 @@ The ultra‑fast mode uses aggressive Chromium flags and tight timeouts. If your
 ## License
 
 This project is licensed under the MIT License.
+This project is for educational purpose only.
+
+TRAINED & BUILT BY ROHIT.R and TEAM
