@@ -1,4 +1,4 @@
-#BUILD BY 5th SEM VTU STUDENTS for Mini-Project
+# BUILD BY 5th SEM VTU STUDENTS for Mini-Project
   Rohit.R trained the CNN Model.
   Shreyas built the Automation. 
   
