@@ -6,6 +6,13 @@
 
 An automated system for fetching results from VTU (Visvesvaraya Technological University) using Playwright browser automation and a locally trained PyTorch model for CAPTCHA recognition. Includes a real‑time web interface with ultra‑fast batch processing.
 
+# Steps to follow to install in your system:
+1. Download & Extract: Unzip the vtu_results_automation_shareable.zip file
+2. Run Setup: Double-click setup_wizard.bat
+3. Follow Prompts: They'll be asked for permission before each dependency installation
+4. Launch App: Use the desktop shortcut or double-click launch_app.bat
+5. Access Web Interface: Open browser to http://localhost:5000
+
 ## Features
 
 - Ultra‑fast result fetching with Playwright (Chromium) and aggressive optimizations
